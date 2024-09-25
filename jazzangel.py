@@ -1,5 +1,22 @@
 import requests
+import difflib
 import re
+
+def compare_content_and_merge(content1, file2):
+    with open(file2, 'r') as f2:
+        text2 = f2.readlines()
+    text1 = content1.splitlines(keepends=True)
+    differ = difflib.Differ()
+    diff = list(differ.compare(text1, text2))
+    merged_content = []
+    for line in diff:
+        if line.startswith(' '):
+            merged_content.append(line[2:])  
+        elif line.startswith('+'):
+            merged_content.append(line[2:])
+        elif line.startswith('-'):
+            merged_content.append(line[2:])
+    return ''.join(merged_content)
 
 def patchJazzAngelJS(html_content):
     pattern = r'(</body>)'
@@ -18,12 +35,15 @@ def cleanHtml(html_content):
 
 def downloadDocs():
     url = 'https://docs.jj2.plus/plus-angelscript.html'
-    file_path = "plus-angelscript.html"
+    file_path = "data/blob.txt"
     response = requests.get(url)
     html_content = response.text
-    newhtml = cleanHtml(html_content)
-    patched_html = patchJazzAngelJS(newhtml)
-    with open(file_path, "w", encoding='utf-8') as file:
-        file.write(patched_html)
- 
+    merged_html = compare_content_and_merge(html_content, file_path)
+    cleaned_html = cleanHtml(merged_html)
+    patched_html = patchJazzAngelJS(cleaned_html)
+    output_file = "plus-angelscript-merged.html"
+    with open(output_file, "w", encoding='utf-8') as file:
+        file.write(patched_html)    
+    print(f"Merged and patched HTML saved to {output_file}")
+
 downloadDocs()
