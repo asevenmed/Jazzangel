@@ -170,14 +170,11 @@ function getItems(rootTableElement) {
 }
 
 let output = {}
-let classes = {}
 
-//throw Error;
-rootTables.forEach(x => (isClassTable[rootTables.indexOf(x)] ? classes : output)[x] = getItems(document.getElementById(x)));
+rootTables.forEach(x => output[x] = getItems(document.getElementById(x)));
 
 function createAndDownloadJSON() {
-    const data = classes;
-    const jsonData = JSON.stringify(data, null, 4);
+    const jsonData = JSON.stringify(output, null, 4);
     const blob = new Blob([jsonData], { type: "application/json" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
@@ -189,11 +186,3 @@ function createAndDownloadJSON() {
 }
 
 window.onload = createAndDownloadJSON;
-
-
-console.log(
-    JSON.stringify(
-        // output
-        classes
-    )
-)
